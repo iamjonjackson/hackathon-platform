@@ -11,7 +11,8 @@ Admin-managed hackathon scoring with live public leaderboards. Built with Next.j
 ### 1. Database (Neon Postgres)
 
 1. In Vercel, open your project → **Storage** → **Create Database Store** → **Neon** (Marketplace integration) and connect it to your Neon project. Vercel injects `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED` automatically at runtime.
-2. Apply the schema once against your Neon database:
+2. The schema is applied **automatically**: on the first database access, the app checks whether the tables exist and runs the idempotent schema (`lib/schema.ts`) if they don't. No manual setup needed.
+3. To apply the schema manually instead (optional), run once:
 
    ```bash
    psql "$DATABASE_URL_UNPOOLED" -f schema.sql
@@ -19,6 +20,8 @@ Admin-managed hackathon scoring with live public leaderboards. Built with Next.j
    ```
 
    (Get `DATABASE_URL_UNPOOLED` from the Neon dashboard → your project → **Connect** → direct connection string.)
+
+Note: auto-setup only creates missing tables — it never alters existing ones. If the schema changes in a future version, apply the migration manually.
 
 ### 2. Environment variables
 
