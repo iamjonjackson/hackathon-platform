@@ -21,8 +21,13 @@ async function tablesExist(): Promise<boolean> {
 }
 
 async function applySchema(): Promise<void> {
+  const statements = SCHEMA_SQL.split(";")
+    .map((s) => s.trim())
+    .filter(Boolean);
   try {
-    await getClient().query(SCHEMA_SQL);
+    for (const statement of statements) {
+      await getClient().query(statement);
+    }
   } catch (error) {
     if (await tablesExist()) return;
     throw error;
