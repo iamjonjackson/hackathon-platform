@@ -3,6 +3,9 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { query, queryOne } from "@/lib/db";
 import { formatTimestamp } from "@/lib/shared";
+import AdminTeamsPanel, {
+  type AdminTeam,
+} from "@/app/components/AdminTeamsPanel";
 import {
   awardAdhocPoints,
   completeTask,
@@ -37,6 +40,7 @@ type Task = {
 };
 type Event = {
   id: string;
+  team_id: string;
   team_name: string;
   type: string;
   points: number;
@@ -73,12 +77,29 @@ export default async function HackathonAdminPage({
     "SELECT id, title, description, points, active FROM tasks WHERE hackathon_id = $1 ORDER BY created_at",
     [id]
   );
-  const events = await query<Event>(
-    `SELECT pe.id, t.name AS team_name, pe.type, pe.points, pe.description, pe.created_at
+  const allEvents = await query<Event>(
+    `SELECT pe.id, pe.team_id, t.name AS team_name, pe.type, pe.points, pe.description, pe.created_at
      FROM point_events pe JOIN teams t ON t.id = pe.team_id
-     WHERE pe.hackathon_id = $1 ORDER BY pe.created_at DESC LIMIT 50`,
+     WHERE pe.hackathon_id = $1 ORDER BY pe.created_at DESC`,
     [id]
   );
+  const events = allEvents.slice(0, 50);
+  const eventsByTeam = new Map<string, AdminTeam["events"]>();
+  for (const e of allEvents) {
+    const list = eventsByTeam.get(e.team_id) ?? [];
+    list.push({
+      id: e.id,
+      type: e.type,
+      points: e.points,
+      description: e.description,
+      created_at: e.created_at,
+    });
+    eventsByTeam.set(e.team_id, list);
+  }
+  const adminTeams: AdminTeam[] = teams.map((team) => ({
+    ...team,
+    events: eventsByTeam.get(team.id) ?? [],
+  }));
 
   const h = await headers();
   const proto = h.get("x-forwarded-proto") ?? "http";
@@ -151,82 +172,20 @@ export default async function HackathonAdminPage({
             Add team
           </button>
         </form>
-        <div className="grid gap-4 md:grid-cols-2">
-          {teams.map((team) => (
-            <div
-              key={team.id}
-              className="space-y-3 rounded-2xl border border-neutral-200 p-4 dark:border-neutral-800"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <form action={updateTeam} className="flex flex-1 flex-wrap items-center gap-2">
-                  <input type="hidden" name="id" value={team.id} />
-                  <input type="hidden" name="hackathonId" value={hackathon.id} />
-                  <input
-                    name="name"
-                    defaultValue={team.name}
-                    required
-                    className={`flex-1 min-w-24 ${inputClass}`}
-                  />
-                  <input
-                    name="description"
-                    defaultValue={team.description}
-                    placeholder="Description"
-                    className={`flex-1 min-w-24 ${inputClass}`}
-                  />
-                  <button className={smallButtonClass}>Save</button>
-                </form>
-                <form action={deleteTeam}>
-                  <input type="hidden" name="id" value={team.id} />
-                  <input type="hidden" name="hackathonId" value={hackathon.id} />
-                  <button className="rounded-md border border-red-300 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950">
-                    Delete
-                  </button>
-                </form>
-              </div>
-              <div className="text-lg font-bold">
-                {team.total} <span className="text-sm font-normal text-neutral-500">pts</span>
-              </div>
-              <form action={completeTask} className="flex flex-wrap items-center gap-2">
-                <input type="hidden" name="hackathonId" value={hackathon.id} />
-                <input type="hidden" name="teamId" value={team.id} />
-                <select name="taskId" required className={`flex-1 ${inputClass}`}>
-                  <option value="">Complete task…</option>
-                  {tasks
-                    .filter((t) => t.active)
-                    .map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.title} (+{t.points})
-                      </option>
-                    ))}
-                </select>
-                <input
-                  name="note"
-                  placeholder="Note (optional)"
-                  className={`flex-1 ${inputClass}`}
-                />
-                <button className={smallButtonClass}>Complete</button>
-              </form>
-              <form action={awardAdhocPoints} className="flex flex-wrap items-center gap-2">
-                <input type="hidden" name="hackathonId" value={hackathon.id} />
-                <input type="hidden" name="teamId" value={team.id} />
-                <input
-                  name="points"
-                  type="number"
-                  placeholder="±pts"
-                  required
-                  className={`w-20 ${inputClass}`}
-                />
-                <input
-                  name="description"
-                  placeholder="Reason (required)"
-                  required
-                  className={`flex-1 ${inputClass}`}
-                />
-                <button className={smallButtonClass}>Award</button>
-              </form>
-            </div>
-          ))}
-        </div>
+        <AdminTeamsPanel
+          teams={adminTeams}
+          tasks={tasks
+            .filter((t) => t.active)
+            .map((t) => ({ id: t.id, title: t.title, points: t.points }))}
+          hackathonId={hackathon.id}
+          actions={{
+            updateTeam,
+            deleteTeam,
+            completeTask,
+            awardAdhocPoints,
+            deletePointEvent,
+          }}
+        />
       </section>
 
       <section className="space-y-4">
