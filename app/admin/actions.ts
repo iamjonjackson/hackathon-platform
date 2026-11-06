@@ -114,7 +114,7 @@ export async function createTask(formData: FormData) {
   const hackathonId = String(formData.get("hackathonId"));
   const title = String(formData.get("title") ?? "").trim();
   const points = Number(formData.get("points"));
-  if (!hackathonId || !title || !Number.isFinite(points) || points <= 0) return;
+  if (!hackathonId || !title || !Number.isFinite(points) || points < 0) return;
   const description = String(formData.get("description") ?? "").trim();
   await query(
     "INSERT INTO tasks (hackathon_id, title, description, points) VALUES ($1, $2, $3, $4)",
@@ -129,7 +129,7 @@ export async function updateTask(formData: FormData) {
   const hackathonId = String(formData.get("hackathonId"));
   const title = String(formData.get("title") ?? "").trim();
   const points = Number(formData.get("points"));
-  if (!id || !title || !Number.isFinite(points) || points <= 0) return;
+  if (!id || !title || !Number.isFinite(points) || points < 0) return;
   const description = String(formData.get("description") ?? "").trim();
   const active = formData.get("active") === "on";
   await query(

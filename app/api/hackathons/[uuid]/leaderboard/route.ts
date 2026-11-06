@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { query, queryOne } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
-import type { LeaderboardData } from "@/lib/shared";
+import type { LeaderboardData, TaskSummary } from "@/lib/shared";
 
 export const dynamic = "force-dynamic";
 
@@ -32,10 +32,16 @@ export async function GET(
     [hackathon.id]
   );
 
+  const tasks = await query<TaskSummary>(
+    "SELECT id, title, description, points FROM tasks WHERE hackathon_id = $1 AND active = true ORDER BY created_at",
+    [hackathon.id]
+  );
+
   const data: LeaderboardData = {
     name: hackathon.name,
     updatedAt: new Date().toISOString(),
     teams,
+    tasks,
   };
   return NextResponse.json(data, {
     headers: { "Cache-Control": "no-store" },

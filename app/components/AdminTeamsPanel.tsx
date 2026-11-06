@@ -172,7 +172,7 @@ function TeamModal({
                 <option value="">Select task…</option>
                 {tasks.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.title} (+{t.points})
+                    {t.title} ({t.points > 0 ? `+${t.points}` : "various"})
                   </option>
                 ))}
               </select>

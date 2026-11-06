@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   hackathon_id UUID NOT NULL REFERENCES hackathons(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   description TEXT NOT NULL DEFAULT '',
-  points INTEGER NOT NULL CHECK (points > 0),
+  points INTEGER NOT NULL CHECK (points >= 0),
   active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );

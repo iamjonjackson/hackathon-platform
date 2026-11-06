@@ -29,8 +29,16 @@ export type TeamDetail = {
   events: TeamEvent[];
 };
 
+export type TaskSummary = {
+  id: string;
+  title: string;
+  description: string;
+  points: number;
+};
+
 export type LeaderboardData = {
   name: string;
   updatedAt: string;
   teams: LeaderboardEntry[];
+  tasks: TaskSummary[];
 };

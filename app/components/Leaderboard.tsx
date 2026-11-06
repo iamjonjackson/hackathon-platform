@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { LeaderboardData, TeamDetail } from "@/lib/shared";
+import type { LeaderboardData, TaskSummary, TeamDetail } from "@/lib/shared";
 import { formatTimestamp } from "@/lib/shared";
 import TeamOverlay from "./TeamOverlay";
 import ThemeToggle from "./ThemeToggle";
@@ -21,6 +21,7 @@ export default function Leaderboard({
 }) {
   const [name, setName] = useState(initialName);
   const [teams, setTeams] = useState(initialTeams);
+  const [tasks, setTasks] = useState<TaskSummary[]>([]);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [teamDetail, setTeamDetail] = useState<TeamDetail | null>(null);
@@ -34,6 +35,7 @@ export default function Leaderboard({
       const data: LeaderboardData = await res.json();
       setName(data.name);
       setTeams(data.teams);
+      setTasks(data.tasks);
       setUpdatedAt(data.updatedAt);
     } catch {
       // keep showing last known data
@@ -75,12 +77,13 @@ export default function Leaderboard({
         </div>
       </div>
 
-      <main className="flex flex-1 flex-col px-6 pb-6 lg:px-12 lg:pb-12">
-        {teams.length === 0 ? (
-          <p className="mt-12 text-center text-neutral-500 dark:text-neutral-400">
-            No teams yet.
-          </p>
-        ) : (
+      <div className="flex min-h-0 flex-1 gap-6 px-6 pb-6 lg:gap-10 lg:px-12 lg:pb-12">
+        <main className="flex min-w-0 flex-1 flex-col">
+          {teams.length === 0 ? (
+            <p className="mt-12 text-center text-neutral-500 dark:text-neutral-400">
+              No teams yet.
+            </p>
+          ) : (
           <ol className="flex flex-1 flex-col justify-center gap-2 lg:gap-4">
             {teams.map((team, index) => (
               <li key={team.id}>
@@ -104,9 +107,46 @@ export default function Leaderboard({
                 </button>
               </li>
             ))}
-          </ol>
-        )}
-      </main>
+            </ol>
+          )}
+        </main>
+
+        <aside className="hidden w-1/5 min-w-56 shrink-0 flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm md:flex dark:border-neutral-800 dark:bg-neutral-900">
+          <h2 className="border-b border-neutral-200 px-4 py-3 text-sm font-bold uppercase tracking-wide text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
+            Tasks to claim
+          </h2>
+          <div className="flex-1 overflow-y-auto p-3">
+            {tasks.length === 0 ? (
+              <p className="py-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
+                No tasks yet.
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {tasks.map((task) => (
+                  <li
+                    key={task.id}
+                    className="rounded-xl border border-neutral-200 px-3 py-2 dark:border-neutral-800"
+                  >
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="truncate text-sm font-semibold">
+                        {task.title}
+                      </span>
+                      <span className="shrink-0 text-sm font-bold tabular-nums">
+                        {task.points > 0 ? `+${task.points}` : "various"}
+                      </span>
+                    </div>
+                    {task.description && (
+                      <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                        {task.description}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </aside>
+      </div>
 
       {selectedTeam && (
         <TeamOverlay
