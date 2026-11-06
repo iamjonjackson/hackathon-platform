@@ -214,6 +214,7 @@ export default async function HackathonAdminPage({
             name="points"
             type="number"
             min={0}
+            defaultValue={0}
             placeholder="Points"
             required
             className={`w-24 ${inputClass}`}

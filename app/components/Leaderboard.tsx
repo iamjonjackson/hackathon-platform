@@ -8,18 +8,41 @@ import ThemeToggle from "./ThemeToggle";
 
 const medal = ["🥇", "🥈", "🥉"];
 
+const URL_PATTERN = /(https?:\/\/[^\s<>"]+)/g;
+
+function renderTextWithLinks(text: string) {
+  return text.split(URL_PATTERN).map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline"
+      >
+        {part}
+      </a>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  );
+}
+
 export default function Leaderboard({
   uuid,
   initialName,
+  initialDescription,
   initialTeams,
   refreshIntervalMs,
 }: {
   uuid: string;
   initialName: string;
+  initialDescription: string;
   initialTeams: LeaderboardData["teams"];
   refreshIntervalMs: number;
 }) {
   const [name, setName] = useState(initialName);
+  const [description, setDescription] = useState(initialDescription);
   const [teams, setTeams] = useState(initialTeams);
   const [tasks, setTasks] = useState<TaskSummary[]>([]);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
@@ -34,6 +57,7 @@ export default function Leaderboard({
       if (!res.ok) return;
       const data: LeaderboardData = await res.json();
       setName(data.name);
+      setDescription(data.description);
       setTeams(data.teams);
       setTasks(data.tasks);
       setUpdatedAt(data.updatedAt);
@@ -68,7 +92,14 @@ export default function Leaderboard({
   return (
     <div className="flex min-h-screen flex-col bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
       <div className="flex items-center justify-between px-6 py-4 lg:px-12">
-        <h1 className="text-2xl font-bold lg:text-4xl">🏆 {name}</h1>
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold lg:text-4xl">🏆 {name}</h1>
+          {description && (
+            <p className="mt-1 max-w-4xl text-sm text-neutral-600 lg:text-base dark:text-neutral-300">
+              {renderTextWithLinks(description)}
+            </p>
+          )}
+        </div>
         <div className="flex items-center gap-4">
           <span className="text-xs text-neutral-500 dark:text-neutral-400 lg:text-sm">
             {updatedAt ? `Updated ${formatTimestamp(updatedAt)}` : "Loading…"}

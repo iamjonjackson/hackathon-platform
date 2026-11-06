@@ -13,10 +13,14 @@ export default async function PublicLeaderboardPage({
   params: Promise<{ uuid: string }>;
 }) {
   const { uuid } = await params;
-  const hackathon = await queryOne<{ id: string; name: string; status: string }>(
-    "SELECT id, name, status FROM hackathons WHERE public_uuid = $1",
-    [uuid]
-  );
+  const hackathon = await queryOne<{
+    id: string;
+    name: string;
+    description: string;
+    status: string;
+  }>("SELECT id, name, description, status FROM hackathons WHERE public_uuid = $1", [
+    uuid,
+  ]);
   if (!hackathon) notFound();
   if (hackathon.status !== "active" && !(await isAuthenticated())) notFound();
 
@@ -26,6 +30,7 @@ export default async function PublicLeaderboardPage({
     <Leaderboard
       uuid={uuid}
       initialName={hackathon.name}
+      initialDescription={hackathon.description}
       initialTeams={initialTeams}
       refreshIntervalMs={LEADERBOARD_REFRESH_INTERVAL_MS}
     />

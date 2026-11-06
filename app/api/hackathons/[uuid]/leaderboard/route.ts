@@ -10,8 +10,13 @@ export async function GET(
   { params }: { params: Promise<{ uuid: string }> }
 ) {
   const { uuid } = await params;
-  const hackathon = await queryOne<{ id: string; name: string; status: string }>(
-    "SELECT id, name, status FROM hackathons WHERE public_uuid = $1",
+  const hackathon = await queryOne<{
+    id: string;
+    name: string;
+    description: string;
+    status: string;
+  }>(
+    "SELECT id, name, description, status FROM hackathons WHERE public_uuid = $1",
     [uuid]
   );
   if (!hackathon) {
@@ -39,6 +44,7 @@ export async function GET(
 
   const data: LeaderboardData = {
     name: hackathon.name,
+    description: hackathon.description,
     updatedAt: new Date().toISOString(),
     teams,
     tasks,

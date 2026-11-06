@@ -38,6 +38,7 @@ export type TaskSummary = {
 
 export type LeaderboardData = {
   name: string;
+  description: string;
   updatedAt: string;
   teams: LeaderboardEntry[];
   tasks: TaskSummary[];
