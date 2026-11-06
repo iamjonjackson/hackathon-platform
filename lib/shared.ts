@@ -16,6 +16,8 @@ export type TeamEvent = {
   type: "task_completion" | "adhoc";
   points: number;
   description: string;
+  task_title: string | null;
+  note: string | null;
   created_at: string;
 };
 

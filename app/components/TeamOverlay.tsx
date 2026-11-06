@@ -54,7 +54,12 @@ export default function TeamOverlay({
                   className="flex items-start justify-between gap-4 rounded-xl border border-neutral-200 px-4 py-3 dark:border-neutral-800"
                 >
                   <div>
-                    <div className="font-medium">{e.description}</div>
+                    <div className="font-medium">{e.task_title ?? e.description}</div>
+                    {e.task_title && e.note && (
+                      <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                        {e.note}
+                      </div>
+                    )}
                     <div className="text-xs text-neutral-500 dark:text-neutral-400">
                       {formatTimestamp(e.created_at)} ·{" "}
                       {e.type === "task_completion" ? "Task completion" : "Ad hoc award"}

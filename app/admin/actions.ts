@@ -172,7 +172,7 @@ export async function completeTask(formData: FormData) {
     `INSERT INTO point_events (hackathon_id, team_id, type, points, description)
      VALUES ($1, $2, 'task_completion', $3, $4)
      RETURNING id`,
-    [hackathonId, teamId, task.points, note || task.title]
+    [hackathonId, teamId, task.points, task.title]
   );
   if (!event) return;
 

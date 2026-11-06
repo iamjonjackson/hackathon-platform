@@ -46,6 +46,8 @@ type Event = {
   type: string;
   points: number;
   description: string;
+  task_title: string | null;
+  note: string | null;
   created_at: string;
 };
 
@@ -79,8 +81,12 @@ export default async function HackathonAdminPage({
     [id]
   );
   const allEvents = await query<Event>(
-    `SELECT pe.id, pe.team_id, t.name AS team_name, pe.type, pe.points, pe.description, pe.created_at
-     FROM point_events pe JOIN teams t ON t.id = pe.team_id
+    `SELECT pe.id, pe.team_id, t.name AS team_name, pe.type, pe.points, pe.description,
+            tk.title AS task_title, a.note, pe.created_at
+     FROM point_events pe
+     JOIN teams t ON t.id = pe.team_id
+     LEFT JOIN achievements a ON a.point_event_id = pe.id
+     LEFT JOIN tasks tk ON tk.id = a.task_id
      WHERE pe.hackathon_id = $1 ORDER BY pe.created_at DESC`,
     [id]
   );
@@ -93,6 +99,8 @@ export default async function HackathonAdminPage({
       type: e.type,
       points: e.points,
       description: e.description,
+      task_title: e.task_title,
+      note: e.note,
       created_at: e.created_at,
     });
     eventsByTeam.set(e.team_id, list);
@@ -297,7 +305,14 @@ export default async function HackathonAdminPage({
                   <td className="px-4 py-2 font-semibold tabular-nums">
                     {e.points > 0 ? `+${e.points}` : e.points}
                   </td>
-                  <td className="px-4 py-2">{e.description}</td>
+                  <td className="px-4 py-2">
+                    {e.task_title ?? e.description}
+                    {e.task_title && e.note && (
+                      <span className="block text-xs text-neutral-500 dark:text-neutral-400">
+                        {e.note}
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-2">
                     <form action={deletePointEvent}>
                       <input type="hidden" name="id" value={e.id} />

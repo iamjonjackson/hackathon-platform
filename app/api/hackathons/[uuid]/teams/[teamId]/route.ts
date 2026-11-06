@@ -34,10 +34,17 @@ export async function GET(
     type: TeamDetail["events"][number]["type"];
     points: number;
     description: string;
+    task_title: string | null;
+    note: string | null;
     created_at: string;
   }>(
-    `SELECT id, type, points, description, created_at
-     FROM point_events WHERE team_id = $1 ORDER BY created_at DESC`,
+    `SELECT pe.id, pe.type, pe.points, pe.description,
+            tk.title AS task_title, a.note,
+            pe.created_at
+     FROM point_events pe
+     LEFT JOIN achievements a ON a.point_event_id = pe.id
+     LEFT JOIN tasks tk ON tk.id = a.task_id
+     WHERE pe.team_id = $1 ORDER BY pe.created_at DESC`,
     [teamId]
   );
 
