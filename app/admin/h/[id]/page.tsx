@@ -6,6 +6,7 @@ import { formatTimestamp } from "@/lib/shared";
 import AdminTeamsPanel, {
   type AdminTeam,
 } from "@/app/components/AdminTeamsPanel";
+import ConfirmSubmit from "@/app/components/ConfirmSubmit";
 import {
   awardAdhocPoints,
   completeTask,
@@ -151,9 +152,12 @@ export default async function HackathonAdminPage({
           </form>
           <form action={deleteHackathon}>
             <input type="hidden" name="id" value={hackathon.id} />
-            <button className="rounded-md border border-red-300 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950">
+            <ConfirmSubmit
+              className="rounded-md border border-red-300 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+              message={`Delete hackathon "${hackathon.name}" and all of its teams, tasks, and point history? This cannot be undone.`}
+            >
               Delete hackathon
-            </button>
+            </ConfirmSubmit>
           </form>
         </div>
       </section>
@@ -247,9 +251,12 @@ export default async function HackathonAdminPage({
               <form action={deleteTask}>
                 <input type="hidden" name="id" value={task.id} />
                 <input type="hidden" name="hackathonId" value={hackathon.id} />
-                <button className="rounded-md border border-red-300 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950">
+                <ConfirmSubmit
+                  className="rounded-md border border-red-300 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+                  message={`Delete task "${task.title}"? Existing point events are kept.`}
+                >
                   Delete
-                </button>
+                </ConfirmSubmit>
               </form>
             </div>
           ))}

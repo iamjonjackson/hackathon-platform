@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatTimestamp } from "@/lib/shared";
+import ConfirmSubmit from "@/app/components/ConfirmSubmit";
 
 export type AdminTaskOption = { id: string; title: string; points: number };
 export type AdminTeamEvent = {
@@ -70,9 +71,12 @@ function EventList({
             <form action={deletePointEvent}>
               <input type="hidden" name="id" value={e.id} />
               <input type="hidden" name="hackathonId" value={hackathonId} />
-              <button className="text-xs text-red-600 hover:underline dark:text-red-400">
+              <ConfirmSubmit
+                className="text-xs text-red-600 hover:underline dark:text-red-400"
+                message="Remove this point event? The team's total will change."
+              >
                 remove
-              </button>
+              </ConfirmSubmit>
             </form>
           </div>
         </li>
@@ -216,9 +220,12 @@ function TeamModal({
             <form action={actions.deleteTeam}>
               <input type="hidden" name="id" value={team.id} />
               <input type="hidden" name="hackathonId" value={hackathonId} />
-              <button className="rounded-md border border-red-300 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950">
+              <ConfirmSubmit
+                className="rounded-md border border-red-300 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+                message={`Delete team "${team.name}" and all of its point history? This cannot be undone.`}
+              >
                 Delete team
-              </button>
+              </ConfirmSubmit>
             </form>
           </section>
         </div>
